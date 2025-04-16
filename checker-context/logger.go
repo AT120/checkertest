@@ -12,6 +12,8 @@ type CheckerLogger struct {
 
 var logger *CheckerLogger = &CheckerLogger{}
 
+const separator = "-------"
+
 func Logger() *CheckerLogger {
 	return logger
 

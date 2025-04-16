@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"encoding/json"
 )
 
 type stringIterator struct {
@@ -83,43 +84,49 @@ func formatError(format, accessor string) error {
 }
 
 func access(accessor string, storage stdlib_types.Storage) (string, error) {
-	//TODO: nested
-	iter := stringIterator{str: accessor, start: "[", stop: "]"}
-	accessor, ok := iter.Next()
-	var current any
-	current = storage[iter.Prefix()]
+    iter := stringIterator{str: accessor, start: "[", stop: "]"}
+    accessor, ok := iter.Next()
+    var current any
+    current = storage[iter.Prefix()]
 
-	for ; ok; accessor, ok = iter.Next() {
-		dict, isMap := current.(map[string]any)
-		if isMap {
-			current = dict[accessor]
-			if current == nil {
-				return "", formatError("value with key: (%s) does not exist", accessor)
-			}
-		} else {
-			array, isArray := current.([]any)
-			if !isArray {
-				return "", formatError("failed to dereference by key (%s), previous values was neither a map[string]any nor an []any", accessor)
-			}
-			idx, err := strconv.ParseInt(accessor, 0, 64)
-			if err != nil {
-				return "", formatError("failed to access an array! expected int as a key but got: (%s)", accessor)
-			}
+    for ; ok; accessor, ok = iter.Next() {
+        dict, isMap := current.(map[string]any)
+        if isMap {
+            current = dict[accessor]
+            if current == nil {
+                return "", formatError("value with key: (%s) does not exist", accessor)
+            }
+        } else {
+            array, isArray := current.([]any)
+            if !isArray {
+                return "", formatError("failed to dereference by key (%s), previous value was neither a map[string]any nor an []any", accessor)
+            }
+            idx, err := strconv.ParseInt(accessor, 0, 64)
+            if err != nil {
+                return "", formatError("failed to access an array! expected int as a key but got: (%s)", accessor)
+            }
 
-			if int(idx) >= len(array) {
-				//TODO: what array? print whole prefix
-				return "", fmt.Errorf("out of bounds! Index: %d. Len: %d", idx, len(array))
-			}
+            if int(idx) >= len(array) {
+                return "", fmt.Errorf("out of bounds! Index: %d. Len: %d", idx, len(array))
+            }
 
-			current = array[idx]
-		}
-	}
+            current = array[idx]
+        }
+    }
 
-	res, ok := current.(string)
-	if !ok {
-		return "", fmt.Errorf("injection result expected to be a string but it is of type (%T)", current)
-	}
-	return res, nil
+    // Convert non-string results to JSON
+    switch v := current.(type) {
+    case string:
+        return v, nil
+    case []any, map[string]any:
+        jsonData, err := json.Marshal(v)
+        if err != nil {
+            return "", fmt.Errorf("failed to marshal JSON: %v", err)
+        }
+        return string(jsonData), nil
+    default:
+        return "", fmt.Errorf("injection result expected to be a string but it is of type (%T)", current)
+    }
 }
 
 func TryInject(injectee string, storage stdlib_types.Storage) (string, error) {

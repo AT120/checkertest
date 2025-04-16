@@ -1,8 +1,27 @@
 package stdlib_types
 
-import shared "backend-testing-module-shared"
-
 type Storage map[string]map[string]any
+
+type Verdict string
+
+const (
+	NT Verdict = "NOT TESTED"
+	OK Verdict = "ACCEPTED"
+	WA Verdict = "WRONG ANSWER"
+	PE Verdict = "PRESENTATION ERROR"
+	EF Verdict = "EPIC FAIL"
+	CF Verdict = "CHECK FAILED"
+	TL Verdict = "TIME LIMIT EXCEED"
+	ML Verdict = "MEMORY LIMIT EXCEED"
+	SV Verdict = "SECURITY VIOLATION"
+	CE Verdict = "COMPILATION ERROR"
+	RE Verdict = "RUNTIME ERROR"
+	IO Verdict = "INVALID IO"
+	TT Verdict = "TESTED"
+	WT Verdict = "WALL TIME LIMIT"
+	DE Verdict = "DOWNLOAD ERROR"
+	MC Verdict = "MISCONFIGURED"
+)
 
 type ExecutorHandler func(
 	id string,
@@ -15,7 +34,7 @@ func (s Storage) InitSection(sectionName string) {
 }
 
 type ExecutorResult struct {
-	Verdict shared.Verdict
+	Verdict Verdict
 	Comment string
 }
 

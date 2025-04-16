@@ -3,7 +3,6 @@ package executors
 import (
 	stdlib_helpers "backend-testing-module-checker/stdlib/helpers"
 	stdlib_types "backend-testing-module-checker/stdlib/types"
-	shared "backend-testing-module-shared"
 )
 
 func SetBaseUrlExecutor(
@@ -14,7 +13,7 @@ func SetBaseUrlExecutor(
 	baseUrl, ok := args.(*string)
 	if !ok {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: "Couldn't cast SET_BASE_URL arguments",
 		}
 	}
@@ -22,6 +21,6 @@ func SetBaseUrlExecutor(
 	stdlib_helpers.DefaultHttpClient.SetBaseUrl(*baseUrl)
 
 	return stdlib_types.ExecutorResult{
-		Verdict: shared.OK,
+		Verdict: stdlib_types.OK,
 	}
 }

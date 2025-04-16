@@ -2,9 +2,6 @@ module backend-testing-module-checker
 
 go 1.21.4
 
-require (
-	backend-testing-module-shared v1.0.0
-	gopkg.in/yaml.v3 v3.0.1
-)
+require gopkg.in/yaml.v3 v3.0.1
 
-replace backend-testing-module-shared v1.0.0 => ../shared
+require github.com/lib/pq v1.10.9 // indirect

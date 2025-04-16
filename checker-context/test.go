@@ -2,7 +2,6 @@ package checkercontext
 
 import (
 	stdlib_types "backend-testing-module-checker/stdlib/types"
-	shared "backend-testing-module-shared"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -30,7 +29,7 @@ func (t *Test) Execute() {
 	sections, err := t.newExecutableSections()
 	if err != nil {
 		writeAnswer(stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: err.Error(),
 		})
 		return
@@ -42,7 +41,7 @@ func (t *Test) Execute() {
 		context.storage.InitSection(section.Name)
 		for _, executor := range section.Executors {
 			result := context.CallExecutor(section.Name, executor.Name, executor.Args)
-			if result.Verdict != shared.OK {
+			if result.Verdict != stdlib_types.OK {
 				result.AppendSectionName(section.Name)
 				writeAnswer(result)
 				return
@@ -51,7 +50,7 @@ func (t *Test) Execute() {
 
 		for _, checker := range section.Checkers {
 			result := context.CallChecker(section.Name, checker.Name, checker.Args)
-			if result.Verdict != shared.OK {
+			if result.Verdict != stdlib_types.OK {
 				result.AppendSectionName(section.Name)
 				writeAnswer(result)
 				return
@@ -60,7 +59,7 @@ func (t *Test) Execute() {
 	}
 
 	writeAnswer(stdlib_types.ExecutorResult{
-		Verdict: shared.OK,
+		Verdict: stdlib_types.OK,
 		Comment: "OK",
 	})
 }
@@ -123,7 +122,7 @@ func (t *Test) newExecutableSections() ([]executableSection, error) {
 
 func WriteError(msg string) {
 	writeAnswer(stdlib_types.ExecutorResult{
-		Verdict: shared.CF,
+		Verdict: stdlib_types.CF,
 		Comment: msg,
 	})
 }

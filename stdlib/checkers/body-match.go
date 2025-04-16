@@ -4,7 +4,6 @@ import (
 	"backend-testing-module-checker/stdlib/executors"
 	stdlib_helpers "backend-testing-module-checker/stdlib/helpers"
 	stdlib_types "backend-testing-module-checker/stdlib/types"
-	shared "backend-testing-module-shared"
 	"fmt"
 	"strings"
 )
@@ -38,7 +37,7 @@ func BodyMatchChecker(
 	arguments, ok := args.(*BodyMatchArgs)
 	if !ok {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: "BODY_MATCH checker failed to retrieve arguments",
 		}
 	}
@@ -46,7 +45,7 @@ func BodyMatchChecker(
 	err := tryInject(arguments, storage)
 	if err != nil {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.PE,
+			Verdict: stdlib_types.PE,
 			Comment: "BODY_MATCH: " + err.Error(),
 		}
 	}
@@ -54,7 +53,7 @@ func BodyMatchChecker(
 	requestBody, ok := storage[id][executors.BODY_KEY]
 	if !ok {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: "BODY_MATCH checker failed to get body of previous request. " +
 				"Make sure there was an HTTP executor in a test file in the same section",
 		}
@@ -63,7 +62,7 @@ func BodyMatchChecker(
 	decodeMatcher, err := stdlib_helpers.NewDecodeMatcher(arguments.Format)
 	if err != nil {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: err.Error(),
 		}
 	}
@@ -72,7 +71,7 @@ func BodyMatchChecker(
 	err = decodeMatcher.Decode(strings.NewReader(arguments.Pattern), &patternObject)
 	if err != nil {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: "BODY_MATCH checker failed to decode pattern: " + err.Error(),
 		}
 	}
@@ -86,17 +85,17 @@ func BodyMatchChecker(
 
 	if err != nil {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: "BODY_MATCH: match failed: " + err.Error(),
 		}
 	}
 
 	if result {
-		return stdlib_types.ExecutorResult{Verdict: shared.OK}
+		return stdlib_types.ExecutorResult{Verdict: stdlib_types.OK}
 	}
 
 	return stdlib_types.ExecutorResult{
-		Verdict: shared.WA,
+		Verdict: stdlib_types.WA,
 		Comment: "Response body does not match expected pattern",
 	}
 

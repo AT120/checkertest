@@ -3,8 +3,9 @@ package executors
 import (
 	stdlib_helpers "backend-testing-module-checker/stdlib/helpers"
 	stdlib_types "backend-testing-module-checker/stdlib/types"
-	shared "backend-testing-module-shared"
+	"bytes"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -73,7 +74,7 @@ func HttpExecutor(
 	arguments, ok := args.(*HttpArgs)
 	if !ok {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: "failed to retrieve arguments",
 		}
 	}
@@ -81,7 +82,7 @@ func HttpExecutor(
 	err := arguments.Inject(storage)
 	if err != nil {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.PE,
+			Verdict: stdlib_types.PE,
 			Comment: err.Error(),
 		}
 	}
@@ -98,20 +99,20 @@ func HttpExecutor(
 		if urlErr, ok := err.(*url.Error); ok {
 			if urlErr.Timeout() {
 				return stdlib_types.ExecutorResult{
-					Verdict: shared.TL,
+					Verdict: stdlib_types.TL,
 					Comment: fmt.Sprintf("request timed out: %v", err),
 				}
 			}
 
 			if opError, ok := urlErr.Unwrap().(*net.OpError); ok {
 				return stdlib_types.ExecutorResult{
-					Verdict: shared.MC,
+					Verdict: stdlib_types.MC,
 					Comment: fmt.Sprintf("operation error: %v", opError),
 				}
 			}
 		}
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.PE,
+			Verdict: stdlib_types.PE,
 			Comment: fmt.Sprintf("error during request: %v", err),
 		}
 	}
@@ -125,25 +126,39 @@ func HttpExecutor(
 
 func bodyDecode(format string, sectionStorage map[string]any, resp *http.Response) *stdlib_types.ExecutorResult {
 	if format == "" {
-		return &stdlib_types.ExecutorResult{Verdict: shared.OK}
+		return &stdlib_types.ExecutorResult{Verdict: stdlib_types.OK}
 	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return &stdlib_types.ExecutorResult{
+			Verdict: stdlib_types.PE,
+			Comment: fmt.Sprintf("couldn't read response body: %v. Response status: %v", err, resp.Status),
+		}
+	}
+	defer resp.Body.Close()
+
+	if len(bodyBytes) == 0 {
+		return &stdlib_types.ExecutorResult{Verdict: stdlib_types.OK}
+	}
+
 	var bodyObject any
 	decoder, err := stdlib_helpers.NewDecodeMatcher(format)
 	if err != nil {
 		return &stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: fmt.Sprintf("failed to create decoder: %v", err),
 		}
 	}
 
-	err = decoder.Decode(resp.Body, &bodyObject)
+	err = decoder.Decode(bytes.NewReader(bodyBytes), &bodyObject)
 	if err != nil {
 		return &stdlib_types.ExecutorResult{
-			Verdict: shared.PE,
+			Verdict: stdlib_types.PE,
 			Comment: fmt.Sprintf("couldn't decode response body: %v. Response status: %v", err, resp.Status),
 		}
 	}
 
 	sectionStorage[BODY_KEY] = bodyObject
-	return &stdlib_types.ExecutorResult{Verdict: shared.OK}
+	return &stdlib_types.ExecutorResult{Verdict: stdlib_types.OK}
 }

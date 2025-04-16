@@ -3,7 +3,6 @@ package checkers
 import (
 	"backend-testing-module-checker/stdlib/executors"
 	stdlib_types "backend-testing-module-checker/stdlib/types"
-	shared "backend-testing-module-shared"
 	"fmt"
 )
 
@@ -42,7 +41,7 @@ func StatusCodeChecker(
 	arguments, ok := args.(*StatusCodeCheckerArgs)
 	if !ok {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: "HTTP executor failed to retrieve arguments",
 		}
 	}
@@ -50,7 +49,7 @@ func StatusCodeChecker(
 	err := arguments.Validate()
 	if err != nil {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: err.Error(),
 		}
 	}
@@ -58,27 +57,27 @@ func StatusCodeChecker(
 	statusCodeUntyped, ok := storage[id][executors.STATUS_CODE_KEY]
 	if !ok {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: "status code was not set for this section",
 		}
 	}
 	statusCode, ok := statusCodeUntyped.(int)
 	if !ok {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: "status code was written to storage with invalid type",
 		}
 	}
 
 	if statusCode == arguments.Exact || (statusCode >= arguments.RangeFrom && statusCode < arguments.RangeTo) {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.OK,
+			Verdict: stdlib_types.OK,
 			Comment: "OK",
 		}
 	}
 
 	return stdlib_types.ExecutorResult{
-		Verdict: shared.WA,
+		Verdict: stdlib_types.WA,
 		Comment: arguments.WAMessage(statusCode),
 	}
 }

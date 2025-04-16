@@ -2,7 +2,6 @@ package checkercontext
 
 import (
 	stdlib_types "backend-testing-module-checker/stdlib/types"
-	shared "backend-testing-module-shared"
 	"fmt"
 )
 
@@ -43,7 +42,7 @@ func (c *checkerContext) CallExecutor(id string, name string, args any) stdlib_t
 	executor := c.RequestExecutors[name]
 	if executor == nil {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: fmt.Sprintf("executor with name %s does not exist", name),
 		}
 	}
@@ -55,7 +54,7 @@ func (c *checkerContext) CallChecker(id string, name string, args any) stdlib_ty
 	checker := c.ResponseCheckers[name]
 	if checker == nil {
 		return stdlib_types.ExecutorResult{
-			Verdict: shared.EF,
+			Verdict: stdlib_types.EF,
 			Comment: fmt.Sprintf("checker with name %s does not exist", name),
 		}
 	}
